@@ -1,13 +1,33 @@
 {
-  "name": "oxlint-plugin-anti-slop",
+  "name": "sloplint",
   "version": "0.1.2",
-  "private": true,
   "description": "Opinionated Oxlint rules that reject low-evidence TypeScript and JavaScript patterns.",
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./effect": "./src/effect/index.ts"
+  },
   "files": [
     "src"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ziinc/sloplint.git"
+  },
+  "homepage": "https://github.com/Ziinc/sloplint#readme",
+  "bugs": {
+    "url": "https://github.com/Ziinc/sloplint/issues"
+  },
+  "keywords": [
+    "oxlint",
+    "oxlint-plugin",
+    "eslint-plugin",
+    "lint",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check": "npm run lint && npm test && npm run typecheck && npm run check:examples",
     "lint": "oxlint src",

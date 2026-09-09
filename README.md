@@ -4,7 +4,7 @@ Opinionated Oxlint rules that reject low-evidence and low-signal TypeScript and 
 
 Anti-slop is first and foremost the ruleset I use with my work, projects, and team. It reflects my preferences and taste rather than attempting to be a universal coding standard.
 
-**This project is meant to be vendored**, not treated as a fixed npm dependency. There is no official npm package. Copy the rules into your repository, read them, and change them to match your team's standards; the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
+**This project is meant to be vendored.** [`sloplint`](https://www.npmjs.com/package/sloplint) is published to npm for convenience, but every version bump ships as a `next`-tagged pre-release and a pre-release GitHub release; there is no `latest` dist-tag to depend on casually. Copy the rules into your repository, read them, and change them to match your team's standards; the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
 
 See [`examples/basic`](examples/basic) for a runnable Oxlint config that loads the plugin and flags a violation.
 
@@ -16,55 +16,28 @@ Register the copied entry point in `oxlint.config.ts`:
 
 ```ts
 import { defineConfig } from "oxlint";
+import { rules as antiSlopRules } from "./tools/oxlint/anti-slop/index.ts";
 
 export default defineConfig({
-  ignorePatterns: [
-    ".agent/**",
-    ".agents/**",
-    ".claude/**",
-    ".codex/**",
-    ".continue/**",
-    ".cursor/**",
-    ".gemini/**",
-    ".opencode/**",
-    ".pi/**",
-    ".roo/**",
-    ".windsurf/**",
-    "tools/oxlint/anti-slop/**",
-  ],
   jsPlugins: [
     { name: "anti-slop", specifier: "./tools/oxlint/anti-slop/index.ts" },
   ],
   rules: {
     "oxc/no-accumulating-spread": "error",
-    "anti-slop/no-array-filter-map": "error",
-    "anti-slop/no-reduce-accumulator-copy": "error",
-    "anti-slop/no-chained-type-assertions": "error",
-    "anti-slop/no-conditional-empty-object-spread": "error",
-    "anti-slop/no-known-value-widening": "error",
-    "anti-slop/no-module-mocking": "error",
-    "anti-slop/no-object-parameters": "error",
-    "anti-slop/no-reflect-apply": "error",
-    "anti-slop/no-reflect-get": "error",
-    "anti-slop/no-runtime-typeof": "error",
-    "anti-slop/no-shape-in-symbol-names": "error",
-    "anti-slop/no-unknown-parameters": "error",
-    "anti-slop/no-unknown-returns": "error",
-    "anti-slop/no-unknown-type-aliases": "error",
-    "anti-slop/no-unsafe-dictionary-type": "error",
-    "anti-slop/no-widen-then-assert": "error",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
+    ...antiSlopRules,
   }
 });
 ```
 
-The same `ignorePatterns`, `jsPlugins`, and rules work under `lint` in a Vite+ config. Merge the ignore patterns into Vite+'s `fmt.ignorePatterns` as well so `vp check` does not reformat installed agent assets or the vendored plugin. Preserve existing ignores and add any other project-local agent tooling directories detected in the repository; do not broadly ignore every dot-directory.
+`antiSlopRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
 
 ### Optional Effect rules
 
 Effect-specific rules live in a separate plugin so projects that do not use Effect do not inherit Effect architecture policy. Register the Effect entry point only in repositories that use Effect:
 
 ```ts
+import { rules as antiSlopEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
+
 export default defineConfig({
   jsPlugins: [
     { name: "anti-slop", specifier: "./tools/oxlint/anti-slop/index.ts" },
@@ -74,7 +47,7 @@ export default defineConfig({
     }
   ],
   rules: {
-    "anti-slop-effect/no-service-constructor-imports": "error"
+    ...antiSlopEffectRules,
   }
 });
 ```
