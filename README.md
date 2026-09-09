@@ -6,6 +6,8 @@ Anti-slop is first and foremost the ruleset I use with my work, projects, and te
 
 **This project is meant to be vendored**, not treated as a fixed npm dependency. There is no official npm package. Copy the rules into your repository, read them, and change them to match your team's standards; the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
 
+See [`examples/basic`](examples/basic) for a runnable Oxlint config that loads the plugin and flags a violation.
+
 ## Manual local installation
 
 Copy `src/` into the target repository, for example at `tools/oxlint/anti-slop/`. If the repository already uses `oxlint`, install `@oxlint/plugins` at exactly the resolved Oxlint version. Otherwise, install the same current version of both packages. Keep both versions exact so upgrades move them together.
