@@ -327,11 +327,11 @@ const userId = value as UserId;
 ## Development
 
 ```bash
-pnpm install
-pnpm check
+npm install
+npm run check
 ```
 
-`src/` is canonical. `pnpm check` runs Oxlint, every RuleTester suite, and TypeScript typechecking.
+`src/` is canonical. `npm run check` runs Oxlint, every RuleTester suite, TypeScript typechecking, and the examples check.
 
 ## License
 
