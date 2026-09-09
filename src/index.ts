@@ -14,6 +14,7 @@ import { noForbiddenTermInSymbolNamesRule } from "./rules/no-shape-in-symbol-nam
 import { noUnknownParametersRule } from "./rules/no-unknown-parameters.ts";
 import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
+import { noUnreadableCommentsRule } from "./rules/no-unreadable-comments.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import { noWidenThenAssertRule } from "./rules/no-widen-then-assert.ts";
 import { requireSafetyCommentForTypeAssertionRule } from "./rules/require-safety-comment-for-type-assertion.ts";
@@ -34,6 +35,7 @@ const ruleImplementations = {
 	"no-unknown-parameters": noUnknownParametersRule,
 	"no-unknown-returns": noUnknownReturnsRule,
 	"no-unknown-type-aliases": noUnknownTypeAliasesRule,
+	"no-unreadable-comments": noUnreadableCommentsRule,
 	"no-widen-then-assert": noWidenThenAssertRule,
 	"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertionRule,
 };

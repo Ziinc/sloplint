@@ -8,8 +8,8 @@ function email(user: { email: string }) {
 
 const users = [{ active: true, email: "a@example.com" }];
 
-// Violates anti-slop/no-array-filter-map: use .flatMap or a single reduce instead
-// of an intermediate array built by .filter().map().
+// This breaks the no-array-filter-map rule. Use flatMap or one reduce call
+// instead of a filter then a map.
 const activeEmails = users.filter(active).map(email);
 
 console.log(activeEmails);

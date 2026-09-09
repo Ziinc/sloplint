@@ -70,6 +70,7 @@ export default defineConfig({
 - `no-unknown-parameters` — rejects `unknown` and unions containing it on function inputs except the explicit `cause` convention and the exact subject of a type predicate.
 - `no-unknown-returns` — rejects explicit function contracts that resolve to `unknown`, `Promise<unknown>`, or `PromiseLike<unknown>`, including scoped and transparent generic aliases.
 - `no-unknown-type-aliases` — rejects scoped and transparent generic aliases whose resolved type is `unknown`.
+- `no-unreadable-comments` — rejects inline and block comments whose prose falls below a [Flesch Reading Ease](https://www.npmjs.com/package/text-readability) floor. Configurable to `strict`, `medium` (default), or `lenient`; short comments and tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, and similar) are exempt.
 - `no-unsafe-dictionary-type` — rejects dictionary value contracts based on `unknown`, `any`, `object`, `{}`, and semantic equivalents. Generic constraints such as `T extends Record<string, unknown>` are allowed.
 - `no-widen-then-assert` — rejects immutable local flows that widen known evidence to `unknown`, `any`, `object`, or a broad record and later assert it back to a narrower type.
 - `require-safety-comment-for-type-assertion` — requires each non-const assertion to have a nearby, non-empty invariant justification. Marker prefixes are configurable and default to `SAFETY`.
@@ -257,6 +258,37 @@ function loadUser(): unknown {
 ```ts
 type ExternalValue = unknown;
 ```
+
+### `no-unreadable-comments`
+
+```ts
+// Instantiate the polymorphic serialization strategy prior to invoking the
+// asynchronous reconciliation procedure.
+const value = serialize(input);
+```
+
+Prefer plain wording:
+
+```ts
+// Serialize the input before writing it to disk.
+const value = serialize(input);
+```
+
+The score is computed from the comment's own text with [`text-readability`](https://www.npmjs.com/package/text-readability)'s Flesch Reading Ease formula; a lower score means denser, harder-to-parse prose. Three levels set the minimum acceptable score:
+
+```json
+{
+  "anti-slop/no-unreadable-comments": ["error", { "level": "strict" }]
+}
+```
+
+| Level      | Minimum score | Rejects roughly            |
+| ---------- | -------------: | --------------------------- |
+| `strict`   |             60 | anything less than standard, easy-to-read prose |
+| `medium`   |             30 | (default) very confusing, jargon-dense prose |
+| `lenient`  |              0 | only pathologically dense prose |
+
+Comments under six words and tool directives (`eslint-disable`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, `istanbul ignore`, `region`/`endregion`, and similar) are exempt because they carry too little prose, or none, for a sentence-level score to mean anything.
 
 ### `no-unsafe-dictionary-type`
 
