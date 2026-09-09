@@ -1,4 +1,4 @@
-name: CI
+name: JS checks
 
 on:
   push:
@@ -21,4 +21,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm typecheck
+      - run: pnpm check:examples
