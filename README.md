@@ -1,32 +1,12 @@
 # anti-slop
 
-[![skills.sh](https://skills.sh/b/dmmulroy/anti-slop)](https://skills.sh/dmmulroy/anti-slop)
-
 Opinionated Oxlint rules that reject low-evidence and low-signal TypeScript and JavaScript patterns.
 
 Anti-slop is first and foremost the ruleset I use with my work, projects, and team. It reflects my preferences and taste rather than attempting to be a universal coding standard.
 
-**This project is meant to be vendored**, not treated as a fixed npm dependency. There is no official npm package. Copy the rules into your repository, read them, and change them to match your team's standards. The bundled agent skill handles the initial copy and configuration; after that, the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
+**This project is meant to be vendored.** [`sloplint`](https://www.npmjs.com/package/sloplint) is published to npm for convenience, but every version bump ships as a `next`-tagged pre-release and a pre-release GitHub release; there is no `latest` dist-tag to depend on casually. Copy the rules into your repository, read them, and change them to match your team's standards; the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
 
-## Install with an agent skill
-
-```bash
-npx skills add dmmulroy/anti-slop --skill install-anti-slop
-```
-
-Then ask your coding agent to install or configure anti-slop in the current repository. The skill copies the plugin, installs compatible Oxlint dependencies—matching an existing Oxlint version when present—merges the plugin into the existing lint configuration, enables every generic rule, and validates the result. In repositories that depend directly on Effect, it also enables the opt-in Effect rule group.
-
-### Update an existing installation
-
-Ask your agent to **update anti-slop while preserving local customizations**, optionally naming an upstream revision or selected fixes. The same skill stages incoming source separately, uses a three-way merge when the original upstream snapshot is recoverable, and otherwise ports reviewed changes conservatively. It preserves local rules and configuration, asks about conflicting policy and enabling new rules, and records provenance for future updates. It does not force-replace the vendored directory.
-
-For latest upstream, ask the agent to retrieve and identify that revision; an already-installed skill bundle may be older. The copy script itself does not fetch or merge updates.
-
-To inspect available skills first:
-
-```bash
-npx skills add dmmulroy/anti-slop --list
-```
+See [`examples/basic`](examples/basic) for a runnable Oxlint config that loads the plugin and flags a violation.
 
 ## Manual local installation
 
@@ -36,55 +16,28 @@ Register the copied entry point in `oxlint.config.ts`:
 
 ```ts
 import { defineConfig } from "oxlint";
+import { rules as antiSlopRules } from "./tools/oxlint/anti-slop/index.ts";
 
 export default defineConfig({
-  ignorePatterns: [
-    ".agent/**",
-    ".agents/**",
-    ".claude/**",
-    ".codex/**",
-    ".continue/**",
-    ".cursor/**",
-    ".gemini/**",
-    ".opencode/**",
-    ".pi/**",
-    ".roo/**",
-    ".windsurf/**",
-    "tools/oxlint/anti-slop/**",
-  ],
   jsPlugins: [
     { name: "anti-slop", specifier: "./tools/oxlint/anti-slop/index.ts" },
   ],
   rules: {
     "oxc/no-accumulating-spread": "error",
-    "anti-slop/no-array-filter-map": "error",
-    "anti-slop/no-reduce-accumulator-copy": "error",
-    "anti-slop/no-chained-type-assertions": "error",
-    "anti-slop/no-conditional-empty-object-spread": "error",
-    "anti-slop/no-known-value-widening": "error",
-    "anti-slop/no-module-mocking": "error",
-    "anti-slop/no-object-parameters": "error",
-    "anti-slop/no-reflect-apply": "error",
-    "anti-slop/no-reflect-get": "error",
-    "anti-slop/no-runtime-typeof": "error",
-    "anti-slop/no-shape-in-symbol-names": "error",
-    "anti-slop/no-unknown-parameters": "error",
-    "anti-slop/no-unknown-returns": "error",
-    "anti-slop/no-unknown-type-aliases": "error",
-    "anti-slop/no-unsafe-dictionary-type": "error",
-    "anti-slop/no-widen-then-assert": "error",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
+    ...antiSlopRules,
   }
 });
 ```
 
-The same `ignorePatterns`, `jsPlugins`, and rules work under `lint` in a Vite+ config. Merge the ignore patterns into Vite+'s `fmt.ignorePatterns` as well so `vp check` does not reformat installed agent assets or the vendored plugin. Preserve existing ignores and add any other project-local agent tooling directories detected in the repository; do not broadly ignore every dot-directory.
+`antiSlopRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
 
 ### Optional Effect rules
 
 Effect-specific rules live in a separate plugin so projects that do not use Effect do not inherit Effect architecture policy. Register the Effect entry point only in repositories that use Effect:
 
 ```ts
+import { rules as antiSlopEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
+
 export default defineConfig({
   jsPlugins: [
     { name: "anti-slop", specifier: "./tools/oxlint/anti-slop/index.ts" },
@@ -94,7 +47,7 @@ export default defineConfig({
     }
   ],
   rules: {
-    "anti-slop-effect/no-service-constructor-imports": "error"
+    ...antiSlopEffectRules,
   }
 });
 ```
@@ -117,6 +70,7 @@ export default defineConfig({
 - `no-unknown-parameters` — rejects `unknown` and unions containing it on function inputs except the explicit `cause` convention and the exact subject of a type predicate.
 - `no-unknown-returns` — rejects explicit function contracts that resolve to `unknown`, `Promise<unknown>`, or `PromiseLike<unknown>`, including scoped and transparent generic aliases.
 - `no-unknown-type-aliases` — rejects scoped and transparent generic aliases whose resolved type is `unknown`.
+- `no-unreadable-comments` — rejects inline and block comments whose prose falls below a [Flesch Reading Ease](https://www.npmjs.com/package/text-readability) floor. Configurable to `strict`, `medium` (default), or `lenient`; short comments and tool directives (`eslint-disable`, `@ts-expect-error`, `prettier-ignore`, and similar) are exempt.
 - `no-unsafe-dictionary-type` — rejects dictionary value contracts based on `unknown`, `any`, `object`, `{}`, and semantic equivalents. Generic constraints such as `T extends Record<string, unknown>` are allowed.
 - `no-widen-then-assert` — rejects immutable local flows that widen known evidence to `unknown`, `any`, `object`, or a broad record and later assert it back to a narrower type.
 - `require-safety-comment-for-type-assertion` — requires each non-const assertion to have a nearby, non-empty invariant justification. Marker prefixes are configurable and default to `SAFETY`.
@@ -305,6 +259,37 @@ function loadUser(): unknown {
 type ExternalValue = unknown;
 ```
 
+### `no-unreadable-comments`
+
+```ts
+// Instantiate the polymorphic serialization strategy prior to invoking the
+// asynchronous reconciliation procedure.
+const value = serialize(input);
+```
+
+Prefer plain wording:
+
+```ts
+// Serialize the input before writing it to disk.
+const value = serialize(input);
+```
+
+The score is computed from the comment's own text with [`text-readability`](https://www.npmjs.com/package/text-readability)'s Flesch Reading Ease formula; a lower score means denser, harder-to-parse prose. Three levels set the minimum acceptable score:
+
+```json
+{
+  "anti-slop/no-unreadable-comments": ["error", { "level": "strict" }]
+}
+```
+
+| Level      | Minimum score | Rejects roughly            |
+| ---------- | -------------: | --------------------------- |
+| `strict`   |             60 | anything less than standard, easy-to-read prose |
+| `medium`   |             30 | (default) very confusing, jargon-dense prose |
+| `lenient`  |              0 | only pathologically dense prose |
+
+Comments under six words and tool directives (`eslint-disable`, `@ts-expect-error`, `@ts-nocheck`, `prettier-ignore`, `istanbul ignore`, `region`/`endregion`, and similar) are exempt because they carry too little prose, or none, for a sentence-level score to mean anything.
+
 ### `no-unsafe-dictionary-type`
 
 ```ts
@@ -347,11 +332,11 @@ const userId = value as UserId;
 ## Development
 
 ```bash
-pnpm install
-pnpm check
+npm install
+npm run check
 ```
 
-`src/` is canonical. After changing production source, run `pnpm sync:skill-assets`; CI checks that the skill's bundled copy remains identical. `pnpm check` runs Oxlint, every RuleTester suite, TypeScript typechecking, and the skill-asset drift check.
+`src/` is canonical. `npm run check` runs Oxlint, every RuleTester suite, TypeScript typechecking, and the examples check.
 
 ## License
 

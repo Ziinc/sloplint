@@ -14,32 +14,44 @@ import { noForbiddenTermInSymbolNamesRule } from "./rules/no-shape-in-symbol-nam
 import { noUnknownParametersRule } from "./rules/no-unknown-parameters.ts";
 import { noUnknownReturnsRule } from "./rules/no-unknown-returns.ts";
 import { noUnknownTypeAliasesRule } from "./rules/no-unknown-type-aliases.ts";
+import { noUnreadableCommentsRule } from "./rules/no-unreadable-comments.ts";
 import { noUnsafeDictionaryTypeRule } from "./rules/no-unsafe-dictionary-type.ts";
 import { noWidenThenAssertRule } from "./rules/no-widen-then-assert.ts";
 import { requireSafetyCommentForTypeAssertionRule } from "./rules/require-safety-comment-for-type-assertion.ts";
 
+const ruleImplementations = {
+	"no-array-filter-map": noArrayFilterMapRule,
+	"no-reduce-accumulator-copy": noReduceAccumulatorCopyRule,
+	"no-chained-type-assertions": noChainedTypeAssertionsRule,
+	"no-conditional-empty-object-spread": noConditionalEmptyObjectSpreadRule,
+	"no-known-value-widening": noKnownValueWideningRule,
+	"no-module-mocking": noModuleMockingRule,
+	"no-object-parameters": noObjectParametersRule,
+	"no-reflect-apply": noReflectApplyRule,
+	"no-reflect-get": noReflectGetRule,
+	"no-runtime-typeof": noRuntimeTypeofRule,
+	"no-unsafe-dictionary-type": noUnsafeDictionaryTypeRule,
+	"no-shape-in-symbol-names": noForbiddenTermInSymbolNamesRule,
+	"no-unknown-parameters": noUnknownParametersRule,
+	"no-unknown-returns": noUnknownReturnsRule,
+	"no-unknown-type-aliases": noUnknownTypeAliasesRule,
+	"no-unreadable-comments": noUnreadableCommentsRule,
+	"no-widen-then-assert": noWidenThenAssertRule,
+	"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertionRule,
+};
+
 /** Generic Oxlint rules that reject low-evidence and low-signal implementation patterns. */
 const antiSlopPlugin = eslintCompatPlugin({
 	meta: { name: "anti-slop" },
-	rules: {
-		"no-array-filter-map": noArrayFilterMapRule,
-		"no-reduce-accumulator-copy": noReduceAccumulatorCopyRule,
-		"no-chained-type-assertions": noChainedTypeAssertionsRule,
-		"no-conditional-empty-object-spread": noConditionalEmptyObjectSpreadRule,
-		"no-known-value-widening": noKnownValueWideningRule,
-		"no-module-mocking": noModuleMockingRule,
-		"no-object-parameters": noObjectParametersRule,
-		"no-reflect-apply": noReflectApplyRule,
-		"no-reflect-get": noReflectGetRule,
-		"no-runtime-typeof": noRuntimeTypeofRule,
-		"no-unsafe-dictionary-type": noUnsafeDictionaryTypeRule,
-		"no-shape-in-symbol-names": noForbiddenTermInSymbolNamesRule,
-		"no-unknown-parameters": noUnknownParametersRule,
-		"no-unknown-returns": noUnknownReturnsRule,
-		"no-unknown-type-aliases": noUnknownTypeAliasesRule,
-		"no-widen-then-assert": noWidenThenAssertRule,
-		"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertionRule,
-	},
+	rules: ruleImplementations,
 });
 
 export default antiSlopPlugin;
+
+/**
+ * Every generic rule enabled at `"error"`, keyed by its `anti-slop/` rule id.
+ * Spread into an Oxlint config's `rules` object alongside the plugin registration.
+ */
+export const rules: Record<string, "error"> = Object.fromEntries(
+	Object.keys(ruleImplementations).map((name) => [`anti-slop/${name}`, "error"]),
+);
