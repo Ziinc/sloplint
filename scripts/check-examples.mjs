@@ -1,17 +1,19 @@
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
+import { slopLintRules } from "../src/index.ts";
+
 const EXAMPLES = [
 	{
 		dir: "examples/basic",
 		command: ["npx", "oxlint", "--config", "oxlint.config.ts", "src"],
-		expected: "anti-slop(no-array-filter-map)",
+		expected: ["anti-slop(no-array-filter-map)"],
 	},
 	{
 		dir: "examples/eslint",
 		install: true,
 		command: ["npx", "eslint", "src"],
-		expected: "anti-slop/no-array-filter-map",
+		expected: Object.keys(slopLintRules),
 	},
 ];
 
@@ -34,15 +36,16 @@ for (const example of EXAMPLES) {
 	});
 
 	const output = `${result.stdout}${result.stderr}`;
+	const missing = example.expected.filter((expected) => !output.includes(expected));
 
-	if (!output.includes(example.expected)) {
+	if (missing.length > 0) {
 		failed = true;
-		console.error(`[check-examples] ${example.dir}: expected output to include "${example.expected}"`);
+		console.error(`[check-examples] ${example.dir}: expected output to include ${missing.join(", ")}`);
 		console.error(output);
 		continue;
 	}
 
-	console.log(`[check-examples] ${example.dir}: OK`);
+	console.log(`[check-examples] ${example.dir}: OK (${example.expected.length} rule id(s) verified)`);
 }
 
 if (failed) {
