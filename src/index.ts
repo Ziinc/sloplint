@@ -41,17 +41,17 @@ const ruleImplementations = {
 };
 
 /** Generic Oxlint rules that reject low-evidence and low-signal implementation patterns. */
-const antiSlopPlugin = eslintCompatPlugin({
+const slopLintPlugin = eslintCompatPlugin({
 	meta: { name: "anti-slop" },
 	rules: ruleImplementations,
 });
 
-export default antiSlopPlugin;
+export default slopLintPlugin;
 
 /**
  * Every generic rule enabled at `"error"`, keyed by its `anti-slop/` rule id.
  * Spread into an Oxlint config's `rules` object alongside the plugin registration.
  */
-export const rules: Record<string, "error"> = Object.fromEntries(
+export const slopLintRules: Record<string, "error"> = Object.fromEntries(
 	Object.keys(ruleImplementations).map((name) => [`anti-slop/${name}`, "error"]),
 );

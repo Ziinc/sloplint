@@ -1,5 +1,5 @@
 import tsParser from "@typescript-eslint/parser";
-import antiSlop, { rules as antiSlopRules } from "../../src/index.ts";
+import slopLint, { slopLintRules } from "../../src/index.ts";
 
 export default [
 	{
@@ -8,10 +8,10 @@ export default [
 			parser: tsParser,
 		},
 		plugins: {
-			"anti-slop": antiSlop,
+			"anti-slop": slopLint,
 		},
 		rules: {
-			...antiSlopRules,
+			...slopLintRules,
 		},
 	},
 ];

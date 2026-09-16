@@ -16,21 +16,21 @@ Register the plugin in `eslint.config.mjs` (flat config) the same way you would 
 
 ```js
 import tsParser from "@typescript-eslint/parser";
-import antiSlop, { rules as antiSlopRules } from "./tools/eslint/anti-slop/index.ts";
+import slopLint, { slopLintRules } from "./tools/eslint/anti-slop/index.ts";
 
 export default [
   {
     files: ["**/*.ts"],
     languageOptions: { parser: tsParser },
-    plugins: { "anti-slop": antiSlop },
+    plugins: { "anti-slop": slopLint },
     rules: {
-      ...antiSlopRules,
+      ...slopLintRules,
     },
   },
 ];
 ```
 
-`antiSlopRules` is the same export used for Oxlint: every generic rule at `"error"`, keyed by its `anti-slop/` rule id. A TypeScript-aware parser such as `@typescript-eslint/parser` is required because the rule set inspects TypeScript syntax (type annotations, assertions, aliases); no type checker is required, so the plain `@typescript-eslint/parser` is sufficient without `parserOptions.project`.
+`slopLintRules` is the same export used for Oxlint: every generic rule at `"error"`, keyed by its `anti-slop/` rule id. A TypeScript-aware parser such as `@typescript-eslint/parser` is required because the rule set inspects TypeScript syntax (type annotations, assertions, aliases); no type checker is required, so the plain `@typescript-eslint/parser` is sufficient without `parserOptions.project`.
 
 See [`examples/eslint`](examples/eslint) for a runnable flat config and an intentional violation.
 
@@ -42,7 +42,7 @@ Register the copied entry point in `oxlint.config.ts`:
 
 ```ts
 import { defineConfig } from "oxlint";
-import { rules as antiSlopRules } from "./tools/oxlint/anti-slop/index.ts";
+import { slopLintRules } from "./tools/oxlint/anti-slop/index.ts";
 
 export default defineConfig({
   jsPlugins: [
@@ -50,19 +50,19 @@ export default defineConfig({
   ],
   rules: {
     "oxc/no-accumulating-spread": "error",
-    ...antiSlopRules,
+    ...slopLintRules,
   }
 });
 ```
 
-`antiSlopRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
+`slopLintRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
 
 ### Optional Effect rules
 
 Effect-specific rules live in a separate plugin so projects that do not use Effect do not inherit Effect architecture policy. Register the Effect entry point only in repositories that use Effect:
 
 ```ts
-import { rules as antiSlopEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
+import { slopLintEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
 
 export default defineConfig({
   jsPlugins: [
@@ -73,7 +73,7 @@ export default defineConfig({
     }
   ],
   rules: {
-    ...antiSlopEffectRules,
+    ...slopLintEffectRules,
   }
 });
 ```
