@@ -7,17 +7,17 @@ const ruleImplementations = {
 };
 
 /** Opt-in Oxlint rules for Effect service and Layer architecture. */
-const antiSlopEffectPlugin = eslintCompatPlugin({
+const slopLintEffectPlugin = eslintCompatPlugin({
 	meta: { name: "anti-slop-effect" },
 	rules: ruleImplementations,
 });
 
-export default antiSlopEffectPlugin;
+export default slopLintEffectPlugin;
 
 /**
  * Every Effect rule enabled at `"error"`, keyed by its `anti-slop-effect/` rule id.
  * Spread into an Oxlint config's `rules` object alongside the plugin registration.
  */
-export const rules: Record<string, "error"> = Object.fromEntries(
+export const slopLintEffectRules: Record<string, "error"> = Object.fromEntries(
 	Object.keys(ruleImplementations).map((name) => [`anti-slop-effect/${name}`, "error"]),
 );
