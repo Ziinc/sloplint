@@ -6,7 +6,33 @@ Anti-slop is first and foremost the ruleset I use with my work, projects, and te
 
 **This project is meant to be vendored.** [`sloplint`](https://www.npmjs.com/package/sloplint) is published to npm for convenience, but every version bump ships as a `next`-tagged pre-release and a pre-release GitHub release; there is no `latest` dist-tag to depend on casually. Copy the rules into your repository, read them, and change them to match your team's standards; the vendored files are yours to maintain and make your own. Community-maintained forks and packages are welcome, but their compatibility and release lifecycle belong to their maintainers.
 
-See [`examples/basic`](examples/basic) for a runnable Oxlint config that loads the plugin and flags a violation.
+See [`examples/basic`](examples/basic) for a runnable Oxlint config that loads the plugin and flags a violation, or [`examples/eslint`](examples/eslint) for the same rules loaded into plain ESLint, with one fixture per rule exercising every rule id.
+
+## Using the rules with ESLint
+
+Every rule is defined with `@oxlint/plugins`' `defineRule` `createOnce` API. `src/index.ts` wraps the plugin with `eslintCompatPlugin`, which adds an ESLint-compatible `create` method to each rule — the same rule implementations that run under Oxlint also run under plain ESLint, no separate port required. This makes `anti-slop` usable in repositories that lint with ESLint instead of, or alongside, Oxlint.
+
+Register the plugin in `eslint.config.mjs` (flat config) the same way you would any other plugin:
+
+```js
+import tsParser from "@typescript-eslint/parser";
+import slopLint, { slopLintRules } from "./tools/eslint/anti-slop/index.ts";
+
+export default [
+  {
+    files: ["**/*.ts"],
+    languageOptions: { parser: tsParser },
+    plugins: { "anti-slop": slopLint },
+    rules: {
+      ...slopLintRules,
+    },
+  },
+];
+```
+
+`slopLintRules` is the same export used for Oxlint: every generic rule at `"error"`, keyed by its `anti-slop/` rule id. A TypeScript-aware parser such as `@typescript-eslint/parser` is required because the rule set inspects TypeScript syntax (type annotations, assertions, aliases); no type checker is required, so the plain `@typescript-eslint/parser` is sufficient without `parserOptions.project`.
+
+See [`examples/eslint`](examples/eslint) for a runnable flat config that exercises every generic rule.
 
 ## Manual local installation
 
@@ -16,7 +42,7 @@ Register the copied entry point in `oxlint.config.ts`:
 
 ```ts
 import { defineConfig } from "oxlint";
-import { rules as antiSlopRules } from "./tools/oxlint/anti-slop/index.ts";
+import { slopLintRules } from "./tools/oxlint/anti-slop/index.ts";
 
 export default defineConfig({
   jsPlugins: [
@@ -24,19 +50,19 @@ export default defineConfig({
   ],
   rules: {
     "oxc/no-accumulating-spread": "error",
-    ...antiSlopRules,
+    ...slopLintRules,
   }
 });
 ```
 
-`antiSlopRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
+`slopLintRules` is every generic rule at `"error"`, keyed by its `anti-slop/` rule id, so it spreads directly into `rules` alongside any other rules already enabled. The same `jsPlugins` registration and spread work under `lint` in a Vite+ config.
 
 ### Optional Effect rules
 
 Effect-specific rules live in a separate plugin so projects that do not use Effect do not inherit Effect architecture policy. Register the Effect entry point only in repositories that use Effect:
 
 ```ts
-import { rules as antiSlopEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
+import { slopLintEffectRules } from "./tools/oxlint/anti-slop/effect/index.ts";
 
 export default defineConfig({
   jsPlugins: [
@@ -47,7 +73,7 @@ export default defineConfig({
     }
   ],
   rules: {
-    ...antiSlopEffectRules,
+    ...slopLintEffectRules,
   }
 });
 ```
